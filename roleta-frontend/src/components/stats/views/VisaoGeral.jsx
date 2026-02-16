@@ -27,7 +27,7 @@ const VisaoGeral = ({ stats, ultimos100, totalGeral }) => {
                         <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-[#00D837] blur-sm animate-pulse"></div>
                     </div>
                     <span className="text-xs font-black text-white uppercase tracking-[0.2em]">
-                        BASEADO NOS <span className="text-[#00D837]">ÚLTIMOS 100 GIROS</span>
+                        BASEADO NOS <span className="text-[#00D837]">ÚLTIMOS RESULTADOS</span>
                     </span>
                 </div>
             </header>

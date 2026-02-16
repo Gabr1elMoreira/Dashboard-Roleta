@@ -7,16 +7,16 @@ const LiveFeed = ({ resultados, filtroEstrategia }) => {
 
     return (
         <div className="h-full flex flex-col">
-            <div className="bg-white/10 backdrop-blur-md p-5 rounded-2xl shadow-xl mb-6 border border-white/20 text-center shrink-0">
-                <h2 className="text-xl font-black text-white uppercase tracking-[0.1em]">
-                    Histórico 100 Números
+            <div className="bg-white/10 backdrop-blur-md p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-xl mb-4 sm:mb-6 border border-white/20 text-center shrink-0">
+                <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-[0.1em]">
+                    Histórico 200 Números
                 </h2>
             </div>
 
-            <div className="bg-black/40 backdrop-blur-md rounded-[32px] shadow-2xl p-3 flex-1 min-h-0 overflow-y-auto border border-white/10 border-t-2 border-t-blue-500/50">
-                <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl sm:rounded-[32px] shadow-2xl p-2 sm:p-3 flex-1 min-h-[300px] sm:min-h-0 overflow-y-auto border border-white/10 border-t-2 border-t-blue-500/50 max-h-[600px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                <div className="grid grid-cols-5 sm:grid-cols-10 gap-1 sm:gap-1.5">
                     {resultados
-                        .slice(0, 100)
+                        .slice(0, 200)
                         .map((r, i) => {
                             const { bg, textColor } = obterCorDeFundoCard(r, filtroEstrategia);
                             const isHighlighted = hoveredNumber !== null && r.numero === hoveredNumber;
