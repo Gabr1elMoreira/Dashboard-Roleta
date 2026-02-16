@@ -81,10 +81,10 @@ function App() {
       {erro && <p className="text-red-600 text-center text-sm sm:text-base">{erro}</p>}
       {sucesso && <p className="text-green-600 text-center text-sm sm:text-base">{sucesso}</p>}
 
-      <div className="grid grid-cols-1 xl:grid-cols-[72.5%_27.5%] gap-6 mt-6 relative">
+      <div className="grid grid-cols-1 xl:grid-cols-[72.5%_27.5%] gap-4 sm:gap-6 mt-4 sm:mt-6 relative">
         {/* 1. Conteúdo Principal */}
         <div className="xl:order-1">
-          <div className="bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 h-fit relative">
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 p-3 sm:p-6 h-fit relative">
             <Estatisticas
               estatisticas={estatisticas}
               resultados={resultados}
@@ -93,15 +93,15 @@ function App() {
 
             {/* Overlay de Alertas (Sobreposição) */}
             {showSinais && (
-              <div className="absolute inset-0 z-50 bg-black rounded-3xl p-6 overflow-y-auto animate-fade-in border-2 border-blue-500/20 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
-                <div className="flex justify-between items-center mb-6 sticky top-0 bg-black p-4 rounded-2xl border border-white/10 z-10 shadow-xl">
-                  <h2 className="text-xl font-black text-white flex items-center gap-3 uppercase tracking-[0.2em]">
+              <div className="absolute inset-0 z-50 bg-black rounded-2xl sm:rounded-3xl p-4 sm:p-6 overflow-y-auto animate-fade-in border-2 border-blue-500/20 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
+                <div className="flex justify-between items-center mb-6 sticky top-0 bg-black p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 z-10 shadow-xl">
+                  <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-3 uppercase tracking-[0.2em]">
                     <span className="flex h-3 w-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]"></span>
-                    Alertas Inteligentes AO VIVO
+                    Alertas AO VIVO
                   </h2>
                   <button
                     onClick={() => setShowSinais(false)}
-                    className="bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-xl transition-all border border-red-500/30"
+                    className="bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-xl transition-all border border-red-500/30 text-xs sm:text-sm"
                   >
                     ✖ FECHAR
                   </button>
