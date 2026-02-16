@@ -47,7 +47,7 @@ export const analisarGatilhos = (resultados) => {
             if (determinarDuzia(r.numero) === d) break;
             atraso++;
         }
-        if (atraso >= 12) {
+        if (atraso >= 15) {
             sinais.push({
                 id: `duzia-atraso-${d}`,
                 tipo: "alerta",
@@ -67,7 +67,7 @@ export const analisarGatilhos = (resultados) => {
             if (determinarColuna(r.numero) === c) break;
             atraso++;
         }
-        if (atraso >= 12) {
+        if (atraso >= 15) {
             sinais.push({
                 id: `coluna-atraso-${c}`,
                 tipo: "alerta",
@@ -157,21 +157,43 @@ export const analisarGatilhos = (resultados) => {
         // Ausentes: Terminais do cavalo que NÃO apareceram NADA nos últimos 15 giros
         const ausentesAbsolutos = cavalo.terminais.filter(t => !ultimos15.some(r => r.numero % 10 === t));
 
-        // Novo Gatilho: Verificar se houve números do mesmo cavalo seguidos (um após o outro)
-        let temSequenciaConsecutiva = false;
-        for (let i = 0; i < ultimos15.length - 1; i++) {
-            if (cavalo.terminais.includes(ultimos15[i].numero % 10) &&
-                cavalo.terminais.includes(ultimos15[i + 1].numero % 10)) {
-                temSequenciaConsecutiva = true;
-                break;
+        // Definição da condição de ativação (Com exceção para o cavalo 0 3 6 9)
+        let condicaoAtiva = false;
+
+        if (cavalo.nome === "CAVALO 0 3 6 9") {
+            // Exceção: Precisa de 3 terminais e 1 sequência dentro de QUALQUER janela de 5 rodadas (dentro das 15)
+            for (let i = 0; i <= ultimos15.length - 5; i++) {
+                const janela = ultimos15.slice(i, i + 5);
+                const countJanela = janela.filter(r => cavalo.terminais.includes(r.numero % 10)).length;
+                let temSequenciaJanela = false;
+                for (let j = 0; j < janela.length - 1; j++) {
+                    if (cavalo.terminais.includes(janela[j].numero % 10) &&
+                        cavalo.terminais.includes(janela[j + 1].numero % 10)) {
+                        temSequenciaJanela = true;
+                        break;
+                    }
+                }
+                if (countJanela >= 3 && temSequenciaJanela) {
+                    condicaoAtiva = true;
+                    break;
+                }
             }
+        } else {
+            // Novo Gatilho: Verificar se houve números do mesmo cavalo seguidos (um após o outro)
+            let temSequenciaConsecutiva = false;
+            for (let i = 0; i < ultimos15.length - 1; i++) {
+                if (cavalo.terminais.includes(ultimos15[i].numero % 10) &&
+                    cavalo.terminais.includes(ultimos15[i + 1].numero % 10)) {
+                    temSequenciaConsecutiva = true;
+                    break;
+                }
+            }
+            // Regra Normal: 3 ocorrências e 1 sequência consecutiva em qualquer lugar das 15
+            condicaoAtiva = (ocorrenciasNoCavalo.length >= 3 && temSequenciaConsecutiva);
         }
 
-        // Gatilho: 
-        // 1. O cavalo tem presença forte (3+ vezes) nos últimos 15
-        // 2. Teve pelo menos uma sequência consecutiva (um número do cavalo seguido de outro do mesmo cavalo)
-        // 3. Falta EXATAMENTE 1 terminal que não saiu NENHUMA vez nos últimos 15
-        if (ocorrenciasNoCavalo.length >= 3 && temSequenciaConsecutiva && ausentesAbsolutos.length === 1) {
+        // Gatilho Final
+        if (condicaoAtiva && ausentesAbsolutos.length === 1) {
             const tAusente = ausentesAbsolutos[0];
             cavalosIncompletos.push({ cavalo: cavalo.nome, terminal: tAusente });
 
@@ -179,9 +201,9 @@ export const analisarGatilhos = (resultados) => {
                 id: `terminal-ausente-dens-15-${tAusente}`,
                 tipo: "oportunidade",
                 categoria: "Terminais",
-                mensagem: `${cavalo.nome}: Detectada sequência de repetição + ausência do terminal ${tAusente}.`,
+                mensagem: `${cavalo.nome}: Detectada forte tendência de terminais com sequência e ausência de ${tAusente}.`,
                 sugestao: `Entrada em Terminais ${tAusente} + 1 Vizinho`,
-                prioridade: ocorrenciasNoCavalo.length >= 5 ? "alta" : "media"
+                prioridade: "alta"
             });
         }
     });
@@ -314,7 +336,7 @@ export const analisarGatilhos = (resultados) => {
                 if (determinarDuzia(r.numero) === d) break;
                 atraso++;
             }
-            if (atraso >= 8 && atraso < 12 && !sinais.find(s => s.id === `duzia-atraso-${d}`)) {
+            if (atraso >= 12 && atraso < 15 && !sinais.find(s => s.id === `duzia-atraso-${d}`)) {
                 sinais.push({
                     id: `duzia-atraso-${d}`,
                     tipo: "alerta",
@@ -333,7 +355,7 @@ export const analisarGatilhos = (resultados) => {
                 if (determinarColuna(r.numero) === c) break;
                 atraso++;
             }
-            if (atraso >= 8 && atraso < 12 && !sinais.find(s => s.id === `coluna-atraso-${c}`)) {
+            if (atraso >= 12 && atraso < 15 && !sinais.find(s => s.id === `coluna-atraso-${c}`)) {
                 sinais.push({
                     id: `coluna-atraso-${c}`,
                     tipo: "alerta",
