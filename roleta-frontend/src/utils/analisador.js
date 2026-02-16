@@ -157,39 +157,27 @@ export const analisarGatilhos = (resultados) => {
         // Ausentes: Terminais do cavalo que NÃO apareceram NADA nos últimos 15 giros
         const ausentesAbsolutos = cavalo.terminais.filter(t => !ultimos15.some(r => r.numero % 10 === t));
 
-        // Definição da condição de ativação (Com exceção para o cavalo 0 3 6 9)
+        // Definição da condição de ativação (Janela de 5 rodadas com 3+ hits e 1 sequência)
         let condicaoAtiva = false;
 
-        if (cavalo.nome === "CAVALO 0 3 6 9") {
-            // Exceção: Precisa de 3 terminais e 1 sequência dentro de QUALQUER janela de 5 rodadas (dentro das 15)
-            for (let i = 0; i <= ultimos15.length - 5; i++) {
-                const janela = ultimos15.slice(i, i + 5);
-                const countJanela = janela.filter(r => cavalo.terminais.includes(r.numero % 10)).length;
-                let temSequenciaJanela = false;
-                for (let j = 0; j < janela.length - 1; j++) {
-                    if (cavalo.terminais.includes(janela[j].numero % 10) &&
-                        cavalo.terminais.includes(janela[j + 1].numero % 10)) {
-                        temSequenciaJanela = true;
-                        break;
-                    }
-                }
-                if (countJanela >= 3 && temSequenciaJanela) {
-                    condicaoAtiva = true;
+        // Procura por uma janela de 5 rodadas dentro dos últimos 15 giros
+        for (let i = 0; i <= ultimos15.length - 5; i++) {
+            const janela = ultimos15.slice(i, i + 5);
+            const countJanela = janela.filter(r => cavalo.terminais.includes(r.numero % 10)).length;
+            let temSequenciaJanela = false;
+
+            for (let j = 0; j < janela.length - 1; j++) {
+                if (cavalo.terminais.includes(janela[j].numero % 10) &&
+                    cavalo.terminais.includes(janela[j + 1].numero % 10)) {
+                    temSequenciaJanela = true;
                     break;
                 }
             }
-        } else {
-            // Novo Gatilho: Verificar se houve números do mesmo cavalo seguidos (um após o outro)
-            let temSequenciaConsecutiva = false;
-            for (let i = 0; i < ultimos15.length - 1; i++) {
-                if (cavalo.terminais.includes(ultimos15[i].numero % 10) &&
-                    cavalo.terminais.includes(ultimos15[i + 1].numero % 10)) {
-                    temSequenciaConsecutiva = true;
-                    break;
-                }
+
+            if (countJanela >= 3 && temSequenciaJanela) {
+                condicaoAtiva = true;
+                break;
             }
-            // Regra Normal: 3 ocorrências e 1 sequência consecutiva em qualquer lugar das 15
-            condicaoAtiva = (ocorrenciasNoCavalo.length >= 3 && temSequenciaConsecutiva);
         }
 
         // Gatilho Final
