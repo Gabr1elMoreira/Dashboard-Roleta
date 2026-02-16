@@ -5,7 +5,7 @@ import { determinarDuzia, determinarColuna, determinarZona, determinarCor, obter
  * Baseado em: Repetição de Padrões, Cruzamento de Atrasos e Frequência
  */
 export const analisarGatilhos = (resultados) => {
-    if (!resultados || resultados.length < 10) return [];
+    if (!resultados || resultados.length < 50) return [];
 
     const sinais = [];
     const ultimos100 = resultados.slice(0, 100);
