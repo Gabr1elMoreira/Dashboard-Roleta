@@ -157,10 +157,21 @@ export const analisarGatilhos = (resultados) => {
         // Ausentes: Terminais do cavalo que NÃO apareceram NADA nos últimos 15 giros
         const ausentesAbsolutos = cavalo.terminais.filter(t => !ultimos15.some(r => r.numero % 10 === t));
 
+        // Novo Gatilho: Verificar se houve números do mesmo cavalo seguidos (um após o outro)
+        let temSequenciaConsecutiva = false;
+        for (let i = 0; i < ultimos15.length - 1; i++) {
+            if (cavalo.terminais.includes(ultimos15[i].numero % 10) &&
+                cavalo.terminais.includes(ultimos15[i + 1].numero % 10)) {
+                temSequenciaConsecutiva = true;
+                break;
+            }
+        }
+
         // Gatilho: 
         // 1. O cavalo tem presença forte (3+ vezes) nos últimos 15
-        // 2. Falta EXATAMENTE 1 terminal que não saiu NENHUMA vez nos últimos 15
-        if (ocorrenciasNoCavalo.length >= 3 && ausentesAbsolutos.length === 1) {
+        // 2. Teve pelo menos uma sequência consecutiva (um número do cavalo seguido de outro do mesmo cavalo)
+        // 3. Falta EXATAMENTE 1 terminal que não saiu NENHUMA vez nos últimos 15
+        if (ocorrenciasNoCavalo.length >= 3 && temSequenciaConsecutiva && ausentesAbsolutos.length === 1) {
             const tAusente = ausentesAbsolutos[0];
             cavalosIncompletos.push({ cavalo: cavalo.nome, terminal: tAusente });
 
@@ -168,7 +179,7 @@ export const analisarGatilhos = (resultados) => {
                 id: `terminal-ausente-dens-15-${tAusente}`,
                 tipo: "oportunidade",
                 categoria: "Terminais",
-                mensagem: `${cavalo.nome}: Presença de ${ocorrenciasNoCavalo.length}x nos 15 giros. Terminais ${tAusente} estão 100% ausentes nesta janela.`,
+                mensagem: `${cavalo.nome}: Detectada sequência de repetição + ausência do terminal ${tAusente}.`,
                 sugestao: `Entrada em Terminais ${tAusente} + 1 Vizinho`,
                 prioridade: ocorrenciasNoCavalo.length >= 5 ? "alta" : "media"
             });
