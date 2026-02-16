@@ -161,33 +161,36 @@ export const analisarGatilhos = (resultados) => {
     const cavalosIncompletos = [];
 
     cavalosConfig.forEach(cavalo => {
-        // Filtra todos os números dos últimos 15 que pertencem a este cavalo
-        const ocorrenciasNoCavalo = ultimos15.filter(r => cavalo.terminais.includes(r.numero % 10));
-
-        // Terminais que saíram pelo menos uma vez nos últimos 15
-        const terminaisPresentesNoHistorico = [...new Set(ultimos15.filter(r => [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(r.numero % 10)).map(r => r.numero % 10))];
-
         // Ausentes: Terminais do cavalo que NÃO apareceram NADA nos últimos 15 giros
         const ausentesAbsolutos = cavalo.terminais.filter(t => !ultimos15.some(r => r.numero % 10 === t));
 
-        // Definição da condição de ativação (Janela de 5 rodadas com 3+ hits e 1 sequência)
+        // Definição da condição de ativação (Janela de 5 rodadas com 3+ hits e variedade de terminais)
         let condicaoAtiva = false;
 
         // Procura por uma janela de 5 rodadas dentro dos últimos 15 giros
         for (let i = 0; i <= ultimos15.length - 5; i++) {
             const janela = ultimos15.slice(i, i + 5);
-            const countJanela = janela.filter(r => cavalo.terminais.includes(r.numero % 10)).length;
-            let temSequenciaJanela = false;
+            const hitsNoCavalo = janela.filter(r => cavalo.terminais.includes(r.numero % 10));
+            const countJanelaTotal = hitsNoCavalo.length;
+            const countDiferentes = new Set(hitsNoCavalo.map(r => r.numero % 10)).size;
 
+            let temSequenciaDiferente = false;
             for (let j = 0; j < janela.length - 1; j++) {
-                if (cavalo.terminais.includes(janela[j].numero % 10) &&
-                    cavalo.terminais.includes(janela[j + 1].numero % 10)) {
-                    temSequenciaJanela = true;
+                const t1 = janela[j].numero % 10;
+                const t2 = janela[j + 1].numero % 10;
+                if (cavalo.terminais.includes(t1) && cavalo.terminais.includes(t2) && t1 !== t2) {
+                    temSequenciaDiferente = true;
                     break;
                 }
             }
 
-            if (countJanela >= 3 && temSequenciaJanela) {
+            // Requisito Final:
+            // 1. Pelo menos 3 hits do grupo na janela (Lógica base)
+            // 2. Uma sequência de 2 terminais DIFERENTES do grupo
+            // 3. Variedade: 2 terminais diferentes para cavalos de 3 tipos, 3 para o cavalo 0-3-6-9
+            const reqVariedade = cavalo.terminais.length === 4 ? 3 : 2;
+
+            if (countJanelaTotal >= 3 && temSequenciaDiferente && countDiferentes >= reqVariedade) {
                 condicaoAtiva = true;
                 break;
             }
