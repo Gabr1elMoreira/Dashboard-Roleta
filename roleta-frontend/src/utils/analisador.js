@@ -5,7 +5,7 @@ import { determinarDuzia, determinarColuna, determinarZona, determinarCor, obter
  * Baseado em: Repetição de Padrões, Cruzamento de Atrasos e Frequência
  */
 export const analisarGatilhos = (resultados) => {
-    if (!resultados || resultados.length < 50) return [];
+    if (!resultados || resultados.length < 20) return [];
 
     const sinais = [];
     const ultimos100 = resultados.slice(0, 100);
@@ -80,17 +80,30 @@ export const analisarGatilhos = (resultados) => {
     });
 
     // --- 4. QUEBRA DE TENDÊNCIA DE COR ---
-    const ultimasCores = resultados.slice(0, 6).map(r => determinarCor(r.numero));
-    if (ultimasCores.length >= 5 && ultimasCores.every(c => c === ultimasCores[0] && c !== "verde")) {
-        const corOposta = ultimasCores[0] === "vermelho" ? "PRETO" : "VERMELHO";
-        sinais.push({
-            id: "quebra-cor",
-            tipo: "alerta",
-            categoria: "Cores",
-            mensagem: `Sequência Monocromática: ${ultimasCores.length}x ${ultimasCores[0].toUpperCase()}`,
-            sugestao: `Entrar no ${corOposta} (Probabilidade de quebra 89%)`,
-            prioridade: ultimasCores.length >= 7 ? "alta" : "media"
-        });
+    let sequenciaCor = 0;
+    if (resultados.length > 0) {
+        const primeiraCor = determinarCor(resultados[0].numero);
+        if (primeiraCor !== "verde") {
+            for (const r of resultados) {
+                if (determinarCor(r.numero) === primeiraCor) {
+                    sequenciaCor++;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if (sequenciaCor >= 5) {
+            const corOposta = primeiraCor === "vermelho" ? "PRETO" : "VERMELHO";
+            sinais.push({
+                id: "quebra-cor",
+                tipo: "alerta",
+                categoria: "Cores",
+                mensagem: `Sequência Monocromática: ${sequenciaCor}x ${primeiraCor.toUpperCase()}`,
+                sugestao: `Entrar no ${corOposta} (Probabilidade de quebra ${sequenciaCor >= 6 ? '94%' : '89%'})`,
+                prioridade: sequenciaCor >= 6 ? "alta" : "media"
+            });
+        }
     }
 
     // --- 5. ATRASO DE CAVALOS (FAMÍLIAS DE TERMINAIS) ---
@@ -214,7 +227,7 @@ export const analisarGatilhos = (resultados) => {
                 categoria: "Zonas",
                 mensagem: `Zona ${z.toUpperCase()} não é atingida há ${atraso} giros.`,
                 sugestao: `Cobrir a zona ${z} e vizinhos`,
-                prioridade: "media"
+                prioridade: "alta"
             });
         }
     });
@@ -314,8 +327,8 @@ export const analisarGatilhos = (resultados) => {
         });
     }
 
-    // --- FINALIZAÇÃO E GARANTIA DE 3 GATILHOS ---
-    if (sinais.length < 3) {
+    // --- FINALIZAÇÃO E GARANTIA DE 3 GATILHOS (SOMENTE PARA HISTÓRICO CONSOLIDADO) ---
+    if (resultados.length >= 50 && sinais.length < 3) {
         // Reduzir limites para garantir variedade se houver poucos sinais
         const duzias2 = ["1ª Dúzia", "2ª Dúzia", "3ª Dúzia"];
         duzias2.forEach(d => {
@@ -356,5 +369,11 @@ export const analisarGatilhos = (resultados) => {
         });
     }
 
-    return sinais.slice(0, 5); // Retorna os top 5 para não poluir
+    // Filtragem de Qualidade para Histórico Curto (20-49 resultados)
+    let finalSinais = sinais;
+    if (resultados.length < 50) {
+        finalSinais = finalSinais.filter(s => s.prioridade === "alta" || s.tipo === "elite");
+    }
+
+    return finalSinais.slice(0, 5); // Retorna os top 5 para não poluir
 };
