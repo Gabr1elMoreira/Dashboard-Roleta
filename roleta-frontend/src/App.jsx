@@ -5,7 +5,6 @@ import PainelDeSinais from "./components/PainelDeSinais";
 import Header from "./components/common/Header";
 import LiveFeed from "./components/common/LiveFeed";
 import { useResultados } from "./hooks/useResultados";
-import { useSocket } from "./hooks/useSocket";
 import { API_URL } from "./constants";
 
 function App() {
@@ -23,8 +22,8 @@ function App() {
     adicionarResultado
   } = useResultados();
 
-  // 🔌 Conexão com o Socket via Custom Hook
-  useSocket(adicionarResultado);
+  // 🔌 Conexão com o Socket removida (Não necessário para entradas manuais)
+  // useSocket(adicionarResultado);
 
   // ➕ Enviar número
   const enviarNumero = async () => {
@@ -50,6 +49,9 @@ function App() {
       setNumero("");
       setErro("");
       setSucesso(`NÚMERO ${num} ADICIONADO!`);
+
+      // Atualiza a lista e estatísticas imediatamente após o envio bem-sucedido
+      adicionarResultado({ numero: num });
 
       setTimeout(() => setSucesso(""), 2000);
 
