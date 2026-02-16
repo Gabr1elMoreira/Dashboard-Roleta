@@ -1,6 +1,6 @@
-export const API_URL = process.env.NODE_ENV === 'development'
+export const API_URL = import.meta.env.MODE === 'development'
     ? "http://localhost:4000"
-    : "https://dashboard-roleta.onrender.com";
+    : "https://dashboard-roleta.vercel.app";
 
 export const CORES_CAMUFLADO = [
     "#FF0000", "#f97316", "#facc15", "#00D837",
