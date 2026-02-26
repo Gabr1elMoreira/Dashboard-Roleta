@@ -16,29 +16,79 @@ export const useResultados = () => {
         zona: determinarZona(r.numero),
     });
 
-    useEffect(() => {
-        async function fetchDados() {
-            try {
-                const res = await fetch(`${API_URL}/resultados`);
-                const data = await res.json();
-                const resultadosComEstrategia = data
-                    .map(processarResultado)
-                    .reverse();
-                setResultados(resultadosComEstrategia);
+    // 📊 Função para calcular estatísticas localmente
+    const calcularEstatisticasLocal = (dados) => {
+        const stats = {
+            cores: { vermelho: 0, preto: 0 },
+            cavalos: { cavalo1: 0, cavalo2: 0, cavalo3: 0, outro: 0 },
+            camuflados: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 }
+        };
 
-                const res2 = await fetch(`${API_URL}/estatisticas`);
-                const data2 = await res2.json();
-                setEstatisticas(data2);
-            } catch (err) {
-                console.error(err);
-                setErro("ERRO AO BUSCAR DADOS DO SERVIDOR.");
+        dados.forEach(r => {
+            if (r.cor === 'vermelho' || r.cor === 'preto') stats.cores[r.cor]++;
+
+            const cavaloNome = r.cavalo?.nome || "";
+            if (cavaloNome.includes('1 4 7')) stats.cavalos.cavalo1++;
+            else if (cavaloNome.includes('2 5 8')) stats.cavalos.cavalo2++;
+            else if (cavaloNome.includes('0 3 6 9')) stats.cavalos.cavalo3++;
+            else stats.cavalos.outro++;
+
+            const camufladoStr = r.camuflado || "";
+            if (camufladoStr.startsWith('CAMUFLADO')) {
+                const num = camufladoStr.split(' ')[1];
+                if (stats.camuflados[num] !== undefined) stats.camuflados[num]++;
             }
+        });
+
+        return stats;
+    };
+
+    // 💾 Carregar dados do LocalStorage ao iniciar
+    useEffect(() => {
+        const salvos = localStorage.getItem("historico_roleta");
+        if (salvos) {
+            const lista = JSON.parse(salvos);
+            setResultados(lista);
+            setEstatisticas(calcularEstatisticasLocal(lista));
+        } else {
+            setEstatisticas(calcularEstatisticasLocal([]));
         }
-        fetchDados();
     }, []);
 
+    // 🔄 Função auxiliar para salvar
+    const salvarLocal = (novaLista) => {
+        localStorage.setItem("historico_roleta", JSON.stringify(novaLista));
+    };
+
     const adicionarResultado = (novoResultado) => {
-        setResultados((prev) => [processarResultado(novoResultado), ...prev]);
+        setResultados((prev) => {
+            const novaLista = [processarResultado(novoResultado), ...prev];
+            setEstatisticas(calcularEstatisticasLocal(novaLista));
+            salvarLocal(novaLista);
+            return novaLista;
+        });
+    };
+
+    const excluirUltimo = () => {
+        setResultados((prev) => {
+            const novaLista = prev.slice(1);
+            setEstatisticas(calcularEstatisticasLocal(novaLista));
+            salvarLocal(novaLista);
+            return novaLista;
+        });
+        setSucesso("ÚLTIMO NÚMERO REMOVIDO!");
+        setTimeout(() => setSucesso(""), 2000);
+    };
+
+    const resetarHistorico = () => {
+        if (!window.confirm("TEM CERTEZA QUE DESEJA RESETAR TODO O HISTÓRICO?")) return;
+
+        setResultados([]);
+        setEstatisticas(calcularEstatisticasLocal([]));
+        localStorage.removeItem("historico_roleta");
+
+        setSucesso("HISTÓRICO RESETADO!");
+        setTimeout(() => setSucesso(""), 2000);
     };
 
     return {
@@ -50,6 +100,8 @@ export const useResultados = () => {
         setErro,
         sucesso,
         setSucesso,
-        adicionarResultado
+        adicionarResultado,
+        excluirUltimo,
+        resetarHistorico
     };
 };

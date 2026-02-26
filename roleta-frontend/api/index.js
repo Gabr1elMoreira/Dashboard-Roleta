@@ -71,4 +71,19 @@ app.post('/api/resultados', (req, res) => {
     res.json(novoResultado);
 });
 
+// 🗑️ Excluir último número
+app.delete('/api/resultados/ultimo', (req, res) => {
+    if (resultados.length > 0) {
+        resultados.pop();
+        return res.json({ mensagem: 'Último resultado removido com sucesso.' });
+    }
+    res.status(400).json({ erro: 'Nenhum resultado para remover.' });
+});
+
+// 🧹 Reset total do histórico
+app.delete('/api/resultados', (req, res) => {
+    resultados = [];
+    res.json({ mensagem: 'Histórico resetado com sucesso.' });
+});
+
 module.exports = app;

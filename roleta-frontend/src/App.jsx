@@ -19,47 +19,36 @@ function App() {
     setErro,
     sucesso,
     setSucesso,
-    adicionarResultado
+    adicionarResultado,
+    excluirUltimo,
+    resetarHistorico
   } = useResultados();
 
   // 🔌 Conexão com o Socket removida (Não necessário para entradas manuais)
   // useSocket(adicionarResultado);
 
   // ➕ Enviar número
-  const enviarNumero = async () => {
+  const enviarNumero = () => {
     if (numero === "") {
       setErro("DIGITE UM NÚMERO ENTRE 0 E 36.");
       setSucesso("");
       return;
     }
 
-    try {
-      const num = parseInt(numero);
-      const res = await fetch(`${API_URL}/resultados`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ numero: num }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.erro || "ERRO NO ENVIO");
-      }
-
-      setNumero("");
-      setErro("");
-      setSucesso(`NÚMERO ${num} ADICIONADO!`);
-
-      // Atualiza a lista e estatísticas imediatamente após o envio bem-sucedido
-      adicionarResultado({ numero: num });
-
-      setTimeout(() => setSucesso(""), 2000);
-
-    } catch (err) {
-      console.error(err);
-      setErro(err.message || "ERRO AO ADICIONAR NÚMERO.");
-      setSucesso("");
+    const num = parseInt(numero);
+    if (isNaN(num) || num < 0 || num > 36) {
+      setErro("NÚMERO INVÁLIDO.");
+      return;
     }
+
+    setNumero("");
+    setErro("");
+    setSucesso(`NÚMERO ${num} ADICIONADO!`);
+
+    // Adiciona localmente via hook
+    adicionarResultado({ numero: num });
+
+    setTimeout(() => setSucesso(""), 2000);
   };
 
   return (
@@ -74,6 +63,8 @@ function App() {
         numero={numero}
         setNumero={setNumero}
         enviarNumero={enviarNumero}
+        excluirUltimo={excluirUltimo}
+        resetarHistorico={resetarHistorico}
         filtroEstrategia={filtroEstrategia}
         setFiltroEstrategia={setFiltroEstrategia}
       />
@@ -117,6 +108,7 @@ function App() {
           <LiveFeed
             resultados={resultados}
             filtroEstrategia={filtroEstrategia}
+            resetarHistorico={resetarHistorico}
           />
         </div>
       </div>

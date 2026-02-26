@@ -96,6 +96,23 @@ app.get('/estatisticas', (req, res) => {
   res.json(calcularEstatisticas());
 });
 
+// 🗑️ Excluir último número
+app.delete('/resultados/ultimo', (req, res) => {
+  if (resultados.length > 0) {
+    resultados.pop();
+    io.emit('atualizacao_estatisticas', calcularEstatisticas());
+    return res.json({ mensagem: 'Último resultado removido com sucesso.' });
+  }
+  res.status(400).json({ erro: 'Nenhum resultado para remover.' });
+});
+
+// 🧹 Reset total do histórico
+app.delete('/resultados', (req, res) => {
+  resultados = [];
+  io.emit('atualizacao_estatisticas', calcularEstatisticas());
+  res.json({ mensagem: 'Histórico resetado com sucesso.' });
+});
+
 io.on('connection', (socket) => {
   console.log('Cliente conectado', socket.id);
   socket.on('disconnect', () => console.log('Cliente desconectou', socket.id));

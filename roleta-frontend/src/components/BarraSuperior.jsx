@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import FilterOption from "./common/FilterOption";
 
-function BarraSuperior({ numero, setNumero, enviarNumero, filtroEstrategia, setFiltroEstrategia }) {
+function BarraSuperior({ numero, setNumero, enviarNumero, excluirUltimo, resetarHistorico, filtroEstrategia, setFiltroEstrategia }) {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
@@ -43,6 +43,19 @@ function BarraSuperior({ numero, setNumero, enviarNumero, filtroEstrategia, setF
             >
               ENVIAR
             </button>
+
+            {/* Ações de Histórico */}
+            <div className="flex gap-2">
+              <button
+                onClick={excluirUltimo}
+                title="Excluir Último"
+                className="bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white p-3 rounded-xl transition-all border border-red-500/30 group"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
